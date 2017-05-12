@@ -9,15 +9,6 @@ public class RSAKeysGenerator {
     RSAKey publicKey;
     RSAKey privateKey;
 
-    private static BigInteger gcd(BigInteger a, BigInteger b) {
-        while (b.compareTo(BigInteger.ZERO) != 0) {
-            BigInteger c = a.mod(b);
-            a = b;
-            b = c;
-        }
-        return a;
-    }
-
     public RSAKeysGenerator() {
         this.privateKey = null;
         this.publicKey = null;
@@ -51,7 +42,7 @@ public class RSAKeysGenerator {
         eulerfunc = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE)); // (p-1)(q - 1)
         do {
             e = new BigInteger(32, rg);
-        } while (e.compareTo(BigInteger.ONE) <= 0 || e.compareTo(eulerfunc) >= 0 || gcd(e, eulerfunc).compareTo(BigInteger.ONE) != 0);
+        } while (e.compareTo(BigInteger.ONE) <= 0 || e.compareTo(eulerfunc) >= 0 || e.gcd(eulerfunc).compareTo(BigInteger.ONE) != 0);
         d = e.modInverse(eulerfunc);
         publicKey = new RSAKey(new BigInteger[]{n, e});
         privateKey = new RSAKey(new BigInteger[]{n, d});
