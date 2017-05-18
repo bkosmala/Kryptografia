@@ -1,7 +1,9 @@
 package crypto.zad3;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Utils {
 
@@ -32,4 +34,30 @@ public class Utils {
         return new BigInteger(1, tab);
     }
     
+    public static List<byte[]> splitIntoBlocks(byte[] array, int blocksize) {
+        List<byte[]> blocks = new ArrayList<>();
+        int inpos = 0;
+        int remaining = array.length;
+        while (remaining > 0) {
+            int len = Math.min(remaining, blocksize);
+            blocks.add(Arrays.copyOfRange(array, inpos, inpos+len));
+            inpos += len;
+            remaining -= len;
+        }
+        return blocks;
+    }
+    
+    public static byte[] concatBlocks(List<byte[]> blocks) {
+        int outpos = 0;
+        int len = 0;
+        for (byte[] b : blocks) {
+            len += b.length;
+        }
+        byte[] res = new byte[len];
+        for (byte[] b : blocks) {
+            System.arraycopy(b, 0, res, outpos, b.length);
+            outpos += b.length;
+        }
+        return res;
+    }
 }

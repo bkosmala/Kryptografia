@@ -1,7 +1,13 @@
 package crypto.zad3;
 
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class RSAAlgorithm {
 
@@ -19,7 +25,7 @@ public class RSAAlgorithm {
         return m;
     }
 
-    private static byte[] PadMessage(byte[] message, int keysize) {
+    private static byte[] packMessage(byte[] message, int keysize) {
         /*
         Format:
         0x01 <dowolna ilość 0x00> 0x01 <wiadomość>
@@ -35,7 +41,7 @@ public class RSAAlgorithm {
         return res;
     }
 
-    private static byte[] UnPadMessage(byte[] message, int keysize) {
+    private static byte[] unpackMessage(byte[] message, int keysize) {
         /*
         Format:
         0x01 <dowolna ilość 0x00> 0x01 <wiadomość>
@@ -65,57 +71,72 @@ public class RSAAlgorithm {
         int ksize = key.getModulus().bitLength() / 8;
         int blocksize = ksize;
         int maxmsglen = ksize - 2;
-        int count = (message.length % maxmsglen != 0) ? message.length / maxmsglen + 1 : message.length / maxmsglen;
-        byte[] output = new byte[blocksize * count];
-        int inpos = 0;
-        int outpos = 0;
-        int msglen;
-
-        for (int i = 0; i < count; i++) {
-            if (message.length - i * maxmsglen < maxmsglen) {
-                msglen = message.length - i * maxmsglen;
-            } else {
-                msglen = maxmsglen;
-            }
-            byte[] block = PadMessage(Arrays.copyOfRange(message, inpos, inpos + msglen), blocksize);
-            BigInteger m = Utils.ByteArrayToBigInt(block);
+        List<byte[]> blocks = Utils.splitIntoBlocks(message, maxmsglen);
+        
+        for (byte[] block : blocks) {
+            byte[] packed = packMessage(block, blocksize);
+            BigInteger m = Utils.ByteArrayToBigInt(packed);
             BigInteger c = encrypt(m, key);
-            byte[] cipher = Utils.BigIntToByteArray(c);
-            System.arraycopy(cipher, 0, output, outpos, blocksize);
-            inpos += msglen;
-            outpos += blocksize;
+            byte[] encrypted = Utils.BigIntToByteArray(c);
+            blocks.set(blocks.indexOf(block), encrypted);
         }
-        return output;
+        
+        return Utils.concatBlocks(blocks);
     }
 
     public static byte[] decrypt(byte[] cipher, RSAKey key) {
         int ksize = key.getModulus().bitLength() / 8;
         int blocksize = ksize;
         if (cipher.length % blocksize != 0) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Cipher lenght is not multiple of key size");
         }
-        int count = cipher.length / blocksize;
-        byte[] output = null;
-        int inpos = 0;
-        int outpos = 0;
-        
-        for (int i = 1; i <= count; i++) {
-            byte[] block = Arrays.copyOfRange(cipher, inpos, inpos + blocksize);
+        List<byte[]> blocks = Utils.splitIntoBlocks(cipher, blocksize);
+        for (byte[] block : blocks) {
             BigInteger c = Utils.ByteArrayToBigInt(block);
             BigInteger m = decrypt(c, key);
-            byte[] msg = Utils.BigIntToByteArray(m);
-            byte[] unpadded = UnPadMessage(msg, blocksize);
-            if (output != null) {
-                output = Arrays.copyOf(output, outpos + unpadded.length);
-                System.arraycopy(unpadded, 0, output, outpos, unpadded.length);
-                outpos += unpadded.length;
-                inpos += blocksize;
-            } else {
-                output = Arrays.copyOf(unpadded, unpadded.length);
-                outpos += unpadded.length;
-                inpos += blocksize;
-            }
+            byte[] decrypted = Utils.BigIntToByteArray(m);
+            byte[] unpacked = unpackMessage(decrypted, blocksize);
+            blocks.set(blocks.indexOf(block), unpacked);
         }
-        return output;
+        return Utils.concatBlocks(blocks);
+    }
+    
+    public static byte[] generateBlankSignature(byte[] message, RSAKey privkey, RSAKey pubkey) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            BigInteger n = pubkey.getModulus();
+            BigInteger e = pubkey.getExponent();
+            BigInteger k = BigInteger.probablePrime(n.bitLength()/2, new SecureRandom());
+            while (k.gcd(n).compareTo(BigInteger.ONE) != 0) {
+                k = k.nextProbablePrime();
+            }
+            BigInteger ke = k.modPow(e, n);
+            BigInteger kinv = k.modInverse(n);
+            List<byte[]> blocks = Utils.splitIntoBlocks(md.digest(message), n.bitLength() - 2);
+            for (byte[] block : blocks) {
+                byte[] packed = packMessage(block, n.bitLength());
+                BigInteger m = Utils.ByteArrayToBigInt(packed);
+                BigInteger mblanked = m.multiply(ke).mod(n);
+                BigInteger mblankedsignature = encrypt(mblanked, privkey);
+                BigInteger msignature = mblankedsignature.multiply(kinv).mod(n);
+                byte[] signature = Utils.BigIntToByteArray(msignature);
+                blocks.set(blocks.indexOf(block), signature);
+            }
+            return Utils.concatBlocks(blocks);
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(RSAAlgorithm.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
+    }
+    
+    public static byte[] generateSignature(byte[] message, RSAKey privkey) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] messagehash = md.digest(message);
+            return encrypt(messagehash, privkey);
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(RSAAlgorithm.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
     }
 }
