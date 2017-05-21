@@ -1,25 +1,23 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package crypto.zad3;
 
 import java.io.File;
-import java.net.URL;
-import java.util.ResourceBundle;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.security.NoSuchAlgorithmException;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-/**
- *
- * @author developer
- */
-public class MainWindowController implements Initializable {
+public class MainWindowController {
 
+    /*
+    From the keys tab
+     */
     @FXML
     private TextArea keyPubExp;
     @FXML
@@ -28,6 +26,22 @@ public class MainWindowController implements Initializable {
     private TextArea keyPubModulus;
     @FXML
     private TextArea keyPrivModulus;
+
+    /*
+    From the signing tab
+     */
+    @FXML
+    private TextArea signingMessage;
+    @FXML
+    private TextArea resultSignature;
+
+    /*
+    From the verification tab
+     */
+    @FXML
+    private TextArea verificationMessage;
+    @FXML
+    private TextArea verificationSignature;
 
     private Stage stage;
     private RSAKey privKey;
@@ -126,13 +140,91 @@ public class MainWindowController implements Initializable {
         }
     }
 
+    @FXML
+    private void signMessage() {
+        try {
+            String message = signingMessage.getText();
+            byte[] msg = message.getBytes(StandardCharsets.UTF_8);
+            byte[] s = RSAAlgorithm.generateSignature(msg, privKey);
+            String signature = Utils.ByteArrayToBigInt(s).toString(16);
+            resultSignature.setText(signature);
+        } catch (NoSuchAlgorithmException ex) {
+            Alert alert = new Alert(AlertType.ERROR, ex.getLocalizedMessage());
+            alert.show();
+        }
+    }
+
+    @FXML
+    private void verifyMessage() {
+        String message = verificationMessage.getText();
+        String signature = verificationSignature.getText();
+        byte[] msg = message.getBytes(StandardCharsets.UTF_8);
+        byte[] s = Utils.BigIntToByteArray(new BigInteger(signature, 16));
+        try {
+            boolean result = RSAAlgorithm.verifySignature(msg, s, pubKey);
+            if (result == true) {
+                Alert alert = new Alert(AlertType.INFORMATION, "Udana weryfikacja wiadomości");
+                alert.show();
+            } else {
+                Alert alert = new Alert(AlertType.INFORMATION, "Weryfikacja wiadomości nie powiodła się");
+                alert.show();
+            }
+        } catch (NoSuchAlgorithmException ex) {
+            Alert alert = new Alert(AlertType.ERROR, ex.getLocalizedMessage());
+            alert.show();
+        }
+
+    }
+
+    private void LoadMessageFromFile(TextArea field, String title) {
+        FileChooser fc = new FileChooser();
+        fc.setTitle(title);
+        File f = fc.showOpenDialog(stage);
+        if (f != null) {
+            try {
+                byte[] b = Files.readAllBytes(f.toPath());
+                String message = new String(b, StandardCharsets.UTF_8);
+                field.setText(message);
+            } catch (IOException ex) {
+                Alert alert = new Alert(AlertType.ERROR, ex.getLocalizedMessage());
+                alert.show();
+            }
+        }
+    }
+    
+    @FXML
+    public void LoadMessageToVerify() {
+        LoadMessageFromFile(verificationMessage, "Wybierz plik z wiadomością");
+    }
+    
+    @FXML
+    public void LoadMessageToSign() {
+        LoadMessageFromFile(signingMessage, "Wybierz plik z wiadomością");
+    }
+    
+    @FXML
+    public void LoadSignatureToVerify() {
+        LoadMessageFromFile(verificationSignature, "Wybierz plik z podpisem");
+    }
+    
+    @FXML
+    public void saveResultSignature() {
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Wybierz miejsce zapisu podpisu");
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Plik tekstowy", "*.txt"));
+        File f = fc.showSaveDialog(stage);
+        if (f != null) {
+            try {
+                byte[] res = resultSignature.getText().getBytes(StandardCharsets.UTF_8);
+                Files.write(f.toPath(), res);
+            } catch (IOException ex) {
+                Alert alert = new Alert(AlertType.ERROR, ex.getLocalizedMessage());
+                alert.show();
+            }
+        }
+    }
+
     public void setStage(Stage stage) {
         this.stage = stage;
     }
-
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        // TODO
-    }
-
 }
