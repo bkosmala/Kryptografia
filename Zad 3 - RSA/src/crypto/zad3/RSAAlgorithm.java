@@ -6,8 +6,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class RSAAlgorithm {
 
@@ -47,7 +45,7 @@ public class RSAAlgorithm {
         0x01 <dowolna ilość 0x00> 0x01 <wiadomość>
          */
         if (message[0] != 0x01) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Invaild message");
         }
         int i = 1;
         while (i < keysize && message[i] == 0x00) {
@@ -55,15 +53,15 @@ public class RSAAlgorithm {
         }
 
         if (i == keysize) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Invaild message");
         }
 
         if (message[i] != 0x01) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Invaild message");
         } else {
             i++;
         }
-        byte[] unpadded = Arrays.copyOfRange(message, i, keysize);
+        byte[] unpadded = Arrays.copyOfRange(message, i, message.length);
         return unpadded;
     }
 
@@ -72,7 +70,7 @@ public class RSAAlgorithm {
         int blocksize = ksize;
         int maxmsglen = ksize - 2;
         List<byte[]> blocks = Utils.splitIntoBlocks(message, maxmsglen);
-        
+
         for (byte[] block : blocks) {
             byte[] packed = packMessage(block, blocksize);
             BigInteger m = Utils.ByteArrayToBigInt(packed);
@@ -80,7 +78,7 @@ public class RSAAlgorithm {
             byte[] encrypted = Utils.BigIntToByteArray(c);
             blocks.set(blocks.indexOf(block), encrypted);
         }
-        
+
         return Utils.concatBlocks(blocks);
     }
 
@@ -100,9 +98,8 @@ public class RSAAlgorithm {
         }
         return Utils.concatBlocks(blocks);
     }
-    
-    public static byte[] generateBlankSignature(byte[] message, RSAKey privkey, RSAKey pubkey) {
-        try {
+
+    public static byte[] generateBlankSignature(byte[] message, RSAKey privkey, RSAKey pubkey) throws NoSuchAlgorithmException {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             BigInteger n = pubkey.getModulus();
             BigInteger e = pubkey.getExponent();
@@ -123,20 +120,18 @@ public class RSAAlgorithm {
                 blocks.set(blocks.indexOf(block), signature);
             }
             return Utils.concatBlocks(blocks);
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(RSAAlgorithm.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
     }
-    
-    public static byte[] generateSignature(byte[] message, RSAKey privkey) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] messagehash = md.digest(message);
-            return encrypt(messagehash, privkey);
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(RSAAlgorithm.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
+
+    public static byte[] generateSignature(byte[] message, RSAKey privkey) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] messagehash = md.digest(message);
+        return encrypt(messagehash, privkey);
+    }
+
+    public static boolean verifySignature(byte[] message, byte[] signature, RSAKey pubkey) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] messagehash = md.digest(message);
+        byte[] encodedhash = decrypt(signature, pubkey);
+        return MessageDigest.isEqual(messagehash, encodedhash);
     }
 }
