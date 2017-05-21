@@ -66,9 +66,9 @@ public class RSAAlgorithm {
     }
 
     public static byte[] encrypt(byte[] message, RSAKey key) {
-        int ksize = key.getModulus().bitLength() / 8;
-        int blocksize = ksize;
-        int maxmsglen = ksize - 2;
+        int rsamsglen = (key.getModulus().bitLength() - 1) / 8;
+        int blocksize = rsamsglen;
+        int maxmsglen = rsamsglen - 2;
         List<byte[]> blocks = Utils.splitIntoBlocks(message, maxmsglen);
 
         for (byte[] block : blocks) {
@@ -99,27 +99,27 @@ public class RSAAlgorithm {
         return Utils.concatBlocks(blocks);
     }
 
-    public static byte[] generateBlankSignature(byte[] message, RSAKey privkey, RSAKey pubkey) throws NoSuchAlgorithmException {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            BigInteger n = pubkey.getModulus();
-            BigInteger e = pubkey.getExponent();
-            BigInteger k = BigInteger.probablePrime(n.bitLength()/2, new SecureRandom());
-            while (k.gcd(n).compareTo(BigInteger.ONE) != 0) {
-                k = k.nextProbablePrime();
-            }
-            BigInteger ke = k.modPow(e, n);
-            BigInteger kinv = k.modInverse(n);
-            List<byte[]> blocks = Utils.splitIntoBlocks(md.digest(message), n.bitLength() - 2);
-            for (byte[] block : blocks) {
-                byte[] packed = packMessage(block, n.bitLength());
-                BigInteger m = Utils.ByteArrayToBigInt(packed);
-                BigInteger mblanked = m.multiply(ke).mod(n);
-                BigInteger mblankedsignature = encrypt(mblanked, privkey);
-                BigInteger msignature = mblankedsignature.multiply(kinv).mod(n);
-                byte[] signature = Utils.BigIntToByteArray(msignature);
-                blocks.set(blocks.indexOf(block), signature);
-            }
-            return Utils.concatBlocks(blocks);
+    public static byte[] generateBlindSignature(byte[] message, RSAKey privkey, RSAKey pubkey) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        BigInteger n = pubkey.getModulus();
+        BigInteger e = pubkey.getExponent();
+        BigInteger k = BigInteger.probablePrime(n.bitLength() / 2, new SecureRandom());
+        while (k.gcd(n).compareTo(BigInteger.ONE) != 0) {
+            k = k.nextProbablePrime();
+        }
+        BigInteger ke = k.modPow(e, n);
+        BigInteger kinv = k.modInverse(n);
+        List<byte[]> blocks = Utils.splitIntoBlocks(md.digest(message), (n.bitLength() - 1) / 8 - 2);
+        for (byte[] block : blocks) {
+            byte[] packed = packMessage(block, (n.bitLength() - 1) / 8);
+            BigInteger m = Utils.ByteArrayToBigInt(packed);
+            BigInteger mblanked = m.multiply(ke).mod(n);
+            BigInteger mblindedsignature = encrypt(mblanked, privkey);
+            BigInteger msignature = mblindedsignature.multiply(kinv).mod(n);
+            byte[] signature = Utils.BigIntToByteArray(msignature);
+            blocks.set(blocks.indexOf(block), signature);
+        }
+        return Utils.concatBlocks(blocks);
     }
 
     public static byte[] generateSignature(byte[] message, RSAKey privkey) throws NoSuchAlgorithmException {

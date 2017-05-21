@@ -143,9 +143,14 @@ public class MainWindowController {
     @FXML
     private void signMessage() {
         try {
+            if (privKey == null || pubKey == null) {
+                Alert alert = new Alert(AlertType.INFORMATION, "Najpierw wskaż klucze");
+                alert.show();
+                return;
+            }
             String message = signingMessage.getText();
             byte[] msg = message.getBytes(StandardCharsets.UTF_8);
-            byte[] s = RSAAlgorithm.generateSignature(msg, privKey);
+            byte[] s = RSAAlgorithm.generateBlindSignature(msg, privKey, pubKey);
             String signature = Utils.ByteArrayToBigInt(s).toString(16);
             resultSignature.setText(signature);
         } catch (NoSuchAlgorithmException ex) {
@@ -156,6 +161,11 @@ public class MainWindowController {
 
     @FXML
     private void verifyMessage() {
+        if (privKey == null || pubKey == null) {
+            Alert alert = new Alert(AlertType.INFORMATION, "Najpierw wskaż klucze");
+            alert.show();
+            return;
+        }
         String message = verificationMessage.getText();
         String signature = verificationSignature.getText();
         byte[] msg = message.getBytes(StandardCharsets.UTF_8);
@@ -191,22 +201,22 @@ public class MainWindowController {
             }
         }
     }
-    
+
     @FXML
     public void LoadMessageToVerify() {
         LoadMessageFromFile(verificationMessage, "Wybierz plik z wiadomością");
     }
-    
+
     @FXML
     public void LoadMessageToSign() {
         LoadMessageFromFile(signingMessage, "Wybierz plik z wiadomością");
     }
-    
+
     @FXML
     public void LoadSignatureToVerify() {
         LoadMessageFromFile(verificationSignature, "Wybierz plik z podpisem");
     }
-    
+
     @FXML
     public void saveResultSignature() {
         FileChooser fc = new FileChooser();
