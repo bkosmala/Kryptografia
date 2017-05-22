@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<TabPane tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="crypto.zad3.MainWindowController">
+   <tabs>
+      <Tab closable="false" text="Podpisywanie">
+         <content>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <VBox prefHeight="393.0" prefWidth="714.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <SplitPane dividerPositions="0.6644444444444444" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="305.0" prefWidth="714.0" VBox.vgrow="ALWAYS">
+                           <items>
+                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                 <children>
+                                    <VBox layoutX="14.0" layoutY="14.0" prefHeight="232.0" prefWidth="221.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                       <children>
+                                          <Label text="Wiadomość:" VBox.vgrow="NEVER" />
+                                          <Separator prefWidth="200.0" visible="false" />
+                                          <TextArea fx:id="signingMessage" prefHeight="200.0" prefWidth="200.0" wrapText="true" VBox.vgrow="ALWAYS">
+                                             <VBox.margin>
+                                                <Insets />
+                                             </VBox.margin>
+                                          </TextArea>
+                                          <Separator prefWidth="200.0" visible="false" />
+                                          <HBox>
+                                             <children>
+                                                <Button mnemonicParsing="false" onAction="#LoadMessageToSign" text="Wczytaj z pliku" HBox.hgrow="NEVER" />
+                                             </children>
+                                          </HBox>
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </AnchorPane>
+                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                 <children>
+                                    <VBox prefHeight="232.0" prefWidth="221.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                       <children>
+                                          <Label text="Podpis:" VBox.vgrow="NEVER" />
+                                          <Separator prefWidth="200.0" visible="false" />
+                                          <TextArea fx:id="resultSignature" editable="false" prefHeight="200.0" prefWidth="200.0" wrapText="true" VBox.vgrow="ALWAYS" />
+                                          <Separator prefWidth="200.0" visible="false" />
+                                          <HBox>
+                                             <children>
+                                                <Button mnemonicParsing="false" onAction="#saveResultSignature" text="Zapisz do pliku" HBox.hgrow="NEVER" />
+                                             </children>
+                                          </HBox>
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </AnchorPane>
+                           </items>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                        </SplitPane>
+                        <Separator prefWidth="200.0" visible="false" />
+                        <Button mnemonicParsing="false" onAction="#signMessage" text="Podpisz" />
+                     </children>
+                  </VBox>
+               </children>
+            </AnchorPane>
+         </content>
+      </Tab>
+      <Tab closable="false" text="Weryfikacja">
+         <content>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <VBox prefHeight="393.0" prefWidth="714.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <SplitPane dividerPositions="0.6644444444444444" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="305.0" prefWidth="714.0" VBox.vgrow="ALWAYS">
+                           <items>
+                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                 <children>
+                                    <VBox layoutX="14.0" layoutY="14.0" prefHeight="232.0" prefWidth="221.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                       <children>
+                                          <Label text="Wiadomość:" VBox.vgrow="NEVER" />
+                                          <Separator prefWidth="200.0" visible="false" />
+                                          <TextArea fx:id="verificationMessage" prefHeight="200.0" prefWidth="200.0" wrapText="true" VBox.vgrow="ALWAYS">
+                                             <VBox.margin>
+                                                <Insets />
+                                             </VBox.margin>
+                                          </TextArea>
+                                          <Separator prefWidth="200.0" visible="false" />
+                                          <HBox>
+                                             <children>
+                                                <Button mnemonicParsing="false" onAction="#LoadMessageToVerify" text="Wczytaj z pliku" HBox.hgrow="NEVER" />
+                                             </children>
+                                          </HBox>
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </AnchorPane>
+                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                                 <children>
+                                    <VBox prefHeight="232.0" prefWidth="221.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                       <children>
+                                          <Label text="Podpis:" VBox.vgrow="NEVER" />
+                                          <Separator prefWidth="200.0" visible="false" />
+                                          <TextArea fx:id="verificationSignature" prefHeight="200.0" prefWidth="200.0" wrapText="true" VBox.vgrow="ALWAYS" />
+                                          <Separator prefWidth="200.0" visible="false" />
+                                          <HBox>
+                                             <children>
+                                                <Button mnemonicParsing="false" onAction="#LoadSignatureToVerify" text="Wczytaj z pliku" HBox.hgrow="NEVER" />
+                                             </children>
+                                          </HBox>
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </AnchorPane>
+                           </items>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                        </SplitPane>
+                        <Separator prefWidth="200.0" visible="false" />
+                        <Button mnemonicParsing="false" onAction="#verifyMessage" text="Weryfikuj" />
+                     </children>
+                  </VBox>
+               </children>
+            </AnchorPane>
+         </content>
+      </Tab>
+      <Tab closable="false" text="Klucze">
+         <content>
+            <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="390.0" prefWidth="656.0">
+               <children>
+                  <VBox layoutX="14.0" layoutY="14.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <SplitPane dividerPositions="0.5" VBox.vgrow="ALWAYS">
+                           <items>
+                              <AnchorPane>
+                                 <children>
+                                    <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                       <children>
+                                          <Label text="Klucz publiczny:" VBox.vgrow="NEVER" />
+                                          <Separator prefWidth="200.0" visible="false" />
+                                          <TextArea fx:id="keyPubExp" editable="false" promptText="Wykładnik" wrapText="true" VBox.vgrow="ALWAYS">
+                                             <VBox.margin>
+                                                <Insets />
+                                             </VBox.margin></TextArea>
+                                          <Separator prefWidth="200.0" visible="false" />
+                                          <TextArea fx:id="keyPubModulus" editable="false" promptText="Moduł" wrapText="true" VBox.vgrow="ALWAYS" />
+                                          <Separator prefWidth="200.0" visible="false" />
+                                          <HBox maxHeight="-Infinity" prefHeight="50.0" VBox.vgrow="NEVER">
+                                             <children>
+                                                <Button mnemonicParsing="false" onAction="#loadPubKeyFromFile" text="Wczytaj z pliku" />
+                                                <Separator orientation="VERTICAL" prefHeight="200.0" visible="false" />
+                                                <Button mnemonicParsing="false" onAction="#savePubKeyToFile" text="Zapisz do pliku" />
+                                             </children>
+                                          </HBox>
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </AnchorPane>
+                              <AnchorPane>
+                                 <children>
+                                    <VBox prefHeight="158.0" prefWidth="455.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                       <children>
+                                          <Label text="Klucz prywatny:" />
+                                          <Separator prefWidth="200.0" visible="false" />
+                                          <TextArea fx:id="keyPrivExp" editable="false" promptText="Wykładnik" wrapText="true" VBox.vgrow="ALWAYS" />
+                                          <Separator prefWidth="200.0" visible="false" />
+                                          <TextArea fx:id="keyPrivModulus" editable="false" promptText="Moduł" wrapText="true" VBox.vgrow="ALWAYS" />
+                                          <Separator prefWidth="200.0" visible="false" />
+                                          <HBox maxHeight="-Infinity" prefHeight="50.0" VBox.vgrow="NEVER">
+                                             <children>
+                                                <Button mnemonicParsing="false" onAction="#loadPrivKeyFromFile" text="Wczytaj z pliku" />
+                                                <Separator orientation="VERTICAL" prefHeight="200.0" visible="false" />
+                                                <Button mnemonicParsing="false" onAction="#savePrivKeyToFile" text="Zapisz do pliku" />
+                                             </children>
+                                          </HBox>
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </AnchorPane>
+                           </items>
+                        </SplitPane>
+                        <Separator prefHeight="3.0" prefWidth="656.0" visible="false" />
+                        <Button mnemonicParsing="false" onAction="#generateKeys" text="Wygeneruj klucze" />
+                     </children>
+                  </VBox>
+               </children>
+            </AnchorPane>
+         </content>
+      </Tab>
+   </tabs>
+</TabPane>
