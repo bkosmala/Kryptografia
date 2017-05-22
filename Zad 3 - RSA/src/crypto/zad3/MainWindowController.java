@@ -84,7 +84,12 @@ public class MainWindowController {
         File f = fc.showOpenDialog(stage);
         if (f != null) {
             String path = f.getAbsolutePath();
-            pubKey = KeyFiles.readKey(path);
+            try {
+                pubKey = KeyFiles.readKey(path);
+            } catch (IOException ex) {
+                Alert alert = new Alert(AlertType.ERROR, ex.getLocalizedMessage());
+                alert.show();
+            }
             if (pubKey != null) {
                 ShowNewPubKey();
             }
@@ -102,8 +107,12 @@ public class MainWindowController {
         File f = fc.showSaveDialog(stage);
         if (f != null) {
             String path = f.getAbsolutePath();
-            System.err.println(path);
-            KeyFiles.writeKey(path, pubKey);
+            try {
+                KeyFiles.writeKey(path, pubKey);
+            } catch (IOException ex) {
+                Alert alert = new Alert(AlertType.ERROR, ex.getLocalizedMessage());
+                alert.show();
+            }
         }
     }
 
@@ -118,7 +127,12 @@ public class MainWindowController {
         File f = fc.showOpenDialog(stage);
         if (f != null) {
             String path = f.getAbsolutePath();
-            privKey = KeyFiles.readKey(path);
+            try {
+                privKey = KeyFiles.readKey(path);
+            } catch (IOException ex) {
+                Alert alert = new Alert(AlertType.ERROR, ex.getLocalizedMessage());
+                alert.show();
+            }
             if (privKey != null) {
                 ShowNewPrivKey();
             }
@@ -136,7 +150,12 @@ public class MainWindowController {
         File f = fc.showSaveDialog(stage);
         if (f != null) {
             String path = f.getAbsolutePath();
-            KeyFiles.writeKey(path, privKey);
+            try {
+                KeyFiles.writeKey(path, privKey);
+            } catch (IOException ex) {
+                Alert alert = new Alert(AlertType.ERROR, ex.getLocalizedMessage());
+                alert.show();
+            }
         }
     }
 
